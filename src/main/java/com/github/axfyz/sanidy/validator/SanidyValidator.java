@@ -127,84 +127,64 @@ public class SanidyValidator {
         List<String> errors = new ArrayList<>();
         String strValue = value != null ? value.toString().trim() : null;
 
-        // Check required
         if (strValue == null || strValue.isEmpty()) {
             if (annotation.required()) {
                 errors.add(fieldName + ": must not be empty");
             }
-            return errors; // stop, tidak perlu cek lanjut kalau kosong
+            return errors;
         }
 
-        // Check injection for all type
         errors.addAll(checkInjection(strValue, fieldName));
         if (!errors.isEmpty())
             return errors;
 
-        // Check based type
         switch (annotation.type()) {
             case NUMERIC:
-                if (!NUMERIC_ONLY.matcher(strValue).matches()) {
+                if (!NUMERIC_ONLY.matcher(strValue).matches())
                     errors.add(fieldName + ": must be numeric only");
-                } else {
+                else
                     errors.addAll(checkLength(strValue, fieldName, annotation.min(), annotation.max()));
-                }
                 break;
-
             case NAME:
-                if (!NAME_PATTERN.matcher(strValue).matches()) {
+                if (!NAME_PATTERN.matcher(strValue).matches())
                     errors.add(fieldName + ": invalid name format");
-                } else {
+                else
                     errors.addAll(checkLength(strValue, fieldName, annotation.min(), annotation.max()));
-                }
                 break;
-
             case ALPHANUMERIC:
-                if (!ALPHANUMERIC.matcher(strValue).matches()) {
+                if (!ALPHANUMERIC.matcher(strValue).matches())
                     errors.add(fieldName + ": alphanumeric only");
-                } else {
+                else
                     errors.addAll(checkLength(strValue, fieldName, annotation.min(), annotation.max()));
-                }
                 break;
-
             case AMOUNT:
-                if (!AMOUNT_PATTERN.matcher(strValue).matches()) {
+                if (!AMOUNT_PATTERN.matcher(strValue).matches())
                     errors.add(fieldName + ": invalid amount format");
-                } else if (new BigDecimal(strValue).compareTo(BigDecimal.ZERO) <= 0) {
+                else if (new BigDecimal(strValue).compareTo(BigDecimal.ZERO) <= 0)
                     errors.add(fieldName + ": amount must be greater than 0");
-                }
                 break;
-
             case DATE:
-                if (!DATE_PATTERN.matcher(strValue).matches()) {
+                if (!DATE_PATTERN.matcher(strValue).matches())
                     errors.add(fieldName + ": invalid date format, use YYYY-MM-DD");
-                }
                 break;
-
             case EMAIL:
-                if (!EMAIL_PATTERN.matcher(strValue.toLowerCase()).matches()) {
+                if (!EMAIL_PATTERN.matcher(strValue.toLowerCase()).matches())
                     errors.add(fieldName + ": invalid email format");
-                }
                 break;
-
             case PHONE:
-                if (!PHONE_PATTERN.matcher(strValue).matches()) {
+                if (!PHONE_PATTERN.matcher(strValue).matches())
                     errors.add(fieldName + ": invalid phone format");
-                }
                 break;
-
             case ENUM:
                 List<String> allowed = Arrays.asList(annotation.allowedValues());
-                if (allowed.isEmpty()) {
+                if (allowed.isEmpty())
                     errors.add(fieldName + ": allowedValues must be defined for ENUM type");
-                } else if (!allowed.contains(strValue)) {
+                else if (!allowed.contains(strValue))
                     errors.add(fieldName + ": must be one of: " + String.join(", ", allowed));
-                }
                 break;
-
             case FREE_TEXT:
                 errors.addAll(checkLength(strValue, fieldName, annotation.min(), annotation.max()));
                 break;
-
             default:
                 errors.add(fieldName + ": unknown field type");
         }
