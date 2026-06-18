@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>com.github.Axfyz</groupId>
+	<groupId>com.github.axfyz</groupId>
     <artifactId>sanidy</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -23,7 +23,7 @@
 			<id>Axfyz</id>
 			<name>Fi</name>
 			<email>f.idevs@pm.me</email>
-			<url>https://github.com/Axfyz</url>
+			<url>https://github.com/Axfyz/sanidy</url>
 		</developer>
 	</developers>
 

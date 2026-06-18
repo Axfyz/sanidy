@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    com.github.Axfyz.sanidy.autoconfigure.SanidyAutoConfiguration
+    com.github.axfyz.sanidy.autoconfigure.SanidyAutoConfiguration
