@@ -9,12 +9,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 import com.github.axfyz.sanidy.annotation.SecureField;
+import com.github.axfyz.sanidy.config.SanidyProperties;
 import com.github.axfyz.sanidy.exception.SanidyException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class SanidyValidator {
+    private final SanidyProperties properties;
+
+    public SanidyValidator(SanidyProperties properties) {
+        this.properties = properties;
+    }
+
     /**
      * Cache
      * Save result scan reflection
@@ -38,12 +45,12 @@ public class SanidyValidator {
      * WarmUp
      */
     public void warmUp(Class<?>... classes) {
-        log.info("[Sandiy WarmUp] Start cached");
+        log.info("[SanidyWarmUp] Start cache");
         for (Class<?> clazz : classes) {
             getFieldMetadata(clazz);
-            log.info("[Sandiy WarmUp] Cache {}", clazz.getSimpleName());
+            log.info("[SanidyWarmUp] Cache {}", clazz.getSimpleName());
         }
-        log.info("[Sanidy WarmUp] Complete — {} class(es) cached", classes.length);
+        log.info("[SanidyWarmUp] Complete — {} class(es) cached", classes.length);
     }
 
     /**
@@ -85,23 +92,6 @@ public class SanidyValidator {
     private static final Pattern EMAIL_PATTERN = Pattern
             .compile("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+\\-\\s]{7,20}$");
-
-    /**
-     * Blacklists
-     */
-    private static final List<String> SQL_KEYWORDS = Arrays.asList(
-            "SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "UNION",
-            "ALTER", "CREATE", "EXEC", "TRUNCATE", "--", "/*", "*/", "0x");
-
-    private static final List<String> URL_SCHEMES = Arrays.asList(
-            "http://", "https://", "ftp://", "file://",
-            "dict://", "gopher://", "ldap://", "://");
-
-    private static final List<String> XSS_PATTERNS = Arrays.asList(
-            "<script", "javascript:", "onerror=", "onload=", "onclick=",
-            "<iframe", "<svg", "alert(", "eval(", "document.cookie", "window.location");
-
-    private static final List<String> BLOCKED_HOSTS = Arrays.asList();
 
     public void validate(Object obj) {
         if (obj == null) {
@@ -231,7 +221,7 @@ public class SanidyValidator {
         String upper = value.toUpperCase();
 
         // Check SSRF — URL scheme
-        for (String scheme : URL_SCHEMES) {
+        for (String scheme : properties.getUrlSchemes()) {
             if (lower.contains(scheme)) {
                 errors.add(field + ": URL input is not allowed");
                 return errors; // stop, tidak perlu cek lanjut
@@ -239,7 +229,7 @@ public class SanidyValidator {
         }
 
         // Check SSRF — blocked host/IP
-        for (String host : BLOCKED_HOSTS) {
+        for (String host : properties.getBlockedHosts()) {
             if (lower.contains(host)) {
                 errors.add(field + ": internal address is not allowed");
                 return errors;
@@ -247,7 +237,7 @@ public class SanidyValidator {
         }
 
         // Check SQL Injection
-        for (String keyword : SQL_KEYWORDS) {
+        for (String keyword : properties.getSqlKeywords()) {
             if (upper.contains(keyword)) {
                 errors.add(field + ": invalid input detected");
                 return errors;
@@ -255,7 +245,7 @@ public class SanidyValidator {
         }
 
         // Check XSS
-        for (String pattern : XSS_PATTERNS) {
+        for (String pattern : properties.getXssPatterns()) {
             if (lower.contains(pattern)) {
                 errors.add(field + ": invalid input detected");
                 return errors;
