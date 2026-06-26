@@ -2,6 +2,8 @@ package com.github.axfyz.sanidy.validator;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,13 +87,17 @@ public class SanidyValidator {
      * Pattern
      */
     private static final Pattern NUMERIC_ONLY = Pattern.compile("^[0-9]+$");
-    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\s.,'\\-]+$");
-    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9\\s]+$");
-    private static final Pattern AMOUNT_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$");
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z]+([\\s.,'\\-][a-zA-Z]+)*$");
+    private static final Pattern ALPHANUMERIC = Pattern.compile("^[a-zA-Z0-9]+(\\s[a-zA-Z0-9]+)*$");
+    private static final Pattern AMOUNT_PATTERN = Pattern.compile("^[0-9]{1,19}(\\.[0-9]{1,2})?$");
     private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
-    private static final Pattern EMAIL_PATTERN = Pattern
-            .compile("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+\\-\\s]{7,20}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[a-zA-Z0-9]([a-zA-Z0-9._%+\\-]*[a-zA-Z0-9])?@" +
+                    "[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?" +
+                    "(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?)*" +
+                    "\\.[a-zA-Z]{2,10}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile(
+            "^(?:\\+628[1-9][0-9]{7,8}|628[1-9][0-9]{7,8}|08[1-9][0-9]{7,8})$");
 
     public void validate(Object obj) {
         if (obj == null) {
@@ -166,6 +172,13 @@ public class SanidyValidator {
             case DATE:
                 if (!DATE_PATTERN.matcher(strValue).matches())
                     errors.add(fieldName + ": invalid date format, use YYYY-MM-DD");
+                else {
+                    try {
+                        LocalDate.parse(strValue); // Calendar logic validation
+                    } catch (DateTimeParseException e) {
+                        errors.add(fieldName + ": invalid date");
+                    }
+                }
                 break;
             case EMAIL:
                 if (!EMAIL_PATTERN.matcher(strValue.toLowerCase()).matches())
