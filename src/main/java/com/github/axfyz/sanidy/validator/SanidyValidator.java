@@ -97,7 +97,7 @@ public class SanidyValidator {
                     "(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?)*" +
                     "\\.[a-zA-Z]{2,10}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile(
-            "^(?:\\+628[1-9][0-9]{7,8}|628[1-9][0-9]{7,8}|08[1-9][0-9]{7,8})$");
+            "^(?:\\+628[1-9][0-9]{7,10}|628[1-9][0-9]{7,11}|08[1-9][0-9]{7,12})$");
 
     public void validate(Object obj) {
         if (obj == null) {
